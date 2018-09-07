@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">JokeTeller</string>
+    <string name="no_joke_error">Opps! There was no joke passed to tell</string>
+</resources>
