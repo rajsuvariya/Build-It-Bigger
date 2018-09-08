@@ -1,5 +1,6 @@
 package com.udacity.gradle.builditbigger;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,12 +15,13 @@ import android.widget.Toast;
 import com.rajsuvariya.jokelib.JokeBox;
 import com.rajsuvariya.joketeller.JokeTellerActivity;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EndpointsAsyncTask.Callback {
 
     private ProgressBar pbLoader;
 
@@ -55,35 +57,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view) {
-        final AsyncTask endpointTask = new EndpointsAsyncTask().execute();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String joke = null;
-                try {
-                    joke = String.valueOf(endpointTask.get(30, TimeUnit.SECONDS));
-                    final String finalJoke = joke;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Intent intent = new Intent(MainActivity.this, JokeTellerActivity.class);
-                            intent.putExtra(JokeTellerActivity.JOKE_KEY, finalJoke);
-                            startActivity(intent);
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (TimeoutException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        AsyncTask endpointTask = new EndpointsAsyncTask(this).execute();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onFinished(String joke) {
+        Intent intent = new Intent(this, JokeTellerActivity.class);
+        intent.putExtra(JokeTellerActivity.JOKE_KEY, joke);
+        startActivity(intent);
     }
 }
